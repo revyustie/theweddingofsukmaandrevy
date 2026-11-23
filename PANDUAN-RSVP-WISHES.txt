@@ -1,0 +1,32 @@
+PANDUAN RSVP + WEDDING WISHES — SUKMA & REVY
+
+Form kini digabung: Nama Pengirim, Konfirmasi Kehadiran (Hadir / Tidak Hadir), dan Ucapan & Doa. Tidak membuka WhatsApp.
+
+1. Ekstrak ZIP dan upload index.html, musik.mp3, couple.png, floral-top-left.png, floral-bottom-right.png ke root repository GitHub Pages.
+2. Tanpa Firebase, formulir berjalan sebagai DEMO: data hanya terlihat di browser masing-masing, tidak terkumpul dari semua tamu.
+3. Agar semua tamu dapat melihat kiriman yang sama, buka https://console.firebase.google.com/ buat project Spark dan Web App, lalu Firestore Database (production mode).
+4. Isi firebaseConfig di dekat akhir index.html (apiKey, authDomain, projectId, appId).
+5. Di Firestore > Rules, gunakan rules contoh berikut dan Publish:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /wedding_wishes/{wishId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['name','message','attendance','createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 1000
+        && request.resource.data.attendance in ['hadir','tidak_hadir']
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+  }
+}
+
+6. Upload index.html yang sudah dikonfigurasi, uji dari dua perangkat berbeda.
+
+PENTING: Firestore dengan aturan publik ini berisiko spam, data palsu, dan pembengkakan kuota. Untuk undangan publik yang aman sebaiknya tambahkan App Check/rate limiting/moderasi. Jangan menampilkan informasi rahasia. Kiriman dapat dihapus manual dari Firebase Console. Lagu komersial memerlukan hak penggunaan yang sesuai.
